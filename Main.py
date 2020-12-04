@@ -20,6 +20,30 @@ class mainWindow():
         cnvsStruct = Canvas(root)
         cnvsStruct.place(x=0,y=0,width=widthMain,height=heightMain)
 
+        ############Menu section
+        self.menu = Menu(root)
+        root.config(menu=self.menu)
+        self.filemenu = Menu(self.menu, tearoff=False)
+        self.menu.add_cascade(label='File', menu=self.filemenu)
+        self.filemenu.add_command(label='Exit', command=root.destroy)
+
+        #####Add categories Menu options
+        self.addCatMenu = Menu(self.menu,tearoff=False)
+        self.menu.add_cascade(label="Add Categories",menu=self.addCatMenu)
+        self.addCatMenu.add_command(label="Main Categories",command=self.fnAddCat)
+        self.addCatMenu.add_command(label="Sub Categories 1",command=self.fnAddSubCat1)
+        self.addCatMenu.add_command(label="Sub Categories 2",command=self.fnAddSubCat2)
+
+        #####Help Menu
+        self.helpmenu = Menu(self.menu, tearoff=False)
+        self.menu.add_cascade(label='Help', menu=self.helpmenu)
+        self.helpmenu.add_command(label='About',command=self.aboutMenu)
+
+        
+
+
+
+
         #Placeholder for showing top 4 suggested categories by machine learning algorithm
         cnvsStruct.create_rectangle(((widthMain*80)/100),0,widthMain,(heightMain/4),fill="#003d66",outline="")
         cnvsStruct.create_rectangle(((widthMain*80)/100),(heightMain/4),widthMain,(heightMain/2),fill="#0099ff",outline="")
@@ -79,7 +103,7 @@ class mainWindow():
         self.time()
 
         btnDateChange = Button(root,text="Change",highlightbackground="#e6e6e6",font=("Times",12,"bold"),command=self.changeButAction)
-        btnDateChange.place(x=310,y=40,height=20)
+        btnDateChange.place(x=320,y=40,height=20)
 
         
         #rendering main category drop down list
@@ -108,10 +132,93 @@ class mainWindow():
         self.dateTimeNow = datetime.now()
         self.strDateTime = str(self.dateTimeNow.strftime("%x"))+"\n"+str(self.dateTimeNow.strftime("%X"))
         self.lblDateTime.config(text=self.strDateTime)
-        self.lblDateTime.after(1000,self.time)
+        self.timer = self.lblDateTime.after(1000,self.time)
+    
+      
+    def aboutMenu(self):
+    #    self.AbtWin = Toplevel(root)
+    #    self.AbtWin.overrideredirect(1)
+    #    self.AbtWin.configure(bg="#000000",bd=1)
+    #    self.AbtWin.geometry("173x143+300+300")
+    #    self.Msg = Message(self.AbtWin, text="This application is developed in Python by using TextBlob and TKinter library. In case of any concern, please contact to email id Piyush.Chanchal@hotmail.com",bg='#F5F5F5')
+    #    self.Msg.pack()
+    #    self.OKBtn= Button(self.AbtWin,text='OK',width=173,command=self.AbtWin.destroy,bg='#696969',fg='#ffffff')
+    #    self.OKBtn.pack()
+    #    self.AbtWin.mainloop()
+        print("About button has been pressed")
+
+    def fnAddCat(self):
+        print("fnAddCat has been called")
+        self.mainCatWin = Toplevel(root)
+        Label(self.mainCatWin,text="Add Main Categories").place(x=10,y=10)
+        self.inNewCat = Entry(self.mainCatWin)
+        self.inNewCat.place(x=10,y=30)
+        Button(self.mainCatWin,text="Add",command=self.addNewMainCat).place(x=10,y=60)
+        Button(self.mainCatWin,text="Remove").place(x=10,y=105)
+        if path.exists("catData/mainCat.csv"):
+            self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
+            self.fetchMainCat()
+
+
+
+    def fetchMainCat(self):
+        yAxisVal = 110
+        for mainCatIter in range(len(self.mainCatCsv['mainCatName'].unique())):
+            yAxisVal = yAxisVal + 20
+            Checkbutton(self.mainCatWin,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter])).place(x=10,y=yAxisVal)
+    
+
+    def addNewMainCat(self):
+        yAxisVal = 110
+        flgCatMainCSV = 0
+        if path.exists("catData/mainCat.csv"):
+            flgCatMainCSV = 1
+        with open("catData/mainCat.csv","a",newline="") as catCSVAppend:
+            inMainCat = csv.writer(catCSVAppend)
+            if flgCatMainCSV==0:
+                inMainCat.writerow(['mainCatId','mainCatName'])
+            inMainCat.writerow([12,str(self.inNewCat.get())])
+        self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
+        for mainCatIter in range(len(self.mainCatCsv['mainCatName'].unique())):
+            yAxisVal = yAxisVal + 20
+            Checkbutton(self.mainCatWin).place(x=10,y=yAxisVal)
+            Label(self.mainCatWin,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter])).place(x=30,y=yAxisVal)
+    
+
+
+    def fnAddSubCat1(self):
+        print("fnAddSubCat1 has been called")
+
+    def fnAddSubCat2(self):
+        print("fnAddSubCat2 has been called")
 
     def changeButAction(self):
         print("Change button has been pressed")
+        self.calWin = Toplevel(root)
+        self.cal = Calendar(self.calWin,
+                   font="Arial 14", selectmode='day',
+                   cursor="arrow", year=2020, month=12, day=3)
+        self.cal.pack(fill="both", expand=True)
+        Button(self.calWin, text="ok", command=self.timepick).pack()
+
+
+    def timepick(self):
+        self.calVal = self.cal.selection_get()
+        self.timePick = Toplevel(self.calWin)
+        Label(self.timePick,text="ENTER TIME \nFormat HH:MM:SS\n(24 Hrs)").pack()
+        self.inTime = Entry(self.timePick)
+        self.inTime.insert(1,"01:00:00")
+        self.inTime.pack()
+        Button(self.timePick,text="ok",command=self.timeValPick).pack()
+        print(self.calVal)
+    
+    def timeValPick(self):
+        self.timeVal = self.inTime.get()
+        print(self.timeVal)
+        self.lblDateTime.after_cancel(self.timer)
+        self.lblDateTime.config(text=""+ str(self.calVal) + "\n" + str(self.timeVal))
+        self.calWin.destroy()
+        self.inTime.destroy()
 
 
     def submitButAction(self):
@@ -145,16 +252,24 @@ class mainWindow():
 
 
     def csvWrite(self):
-        with open(self.strYYYYMMDD + ".csv", 'w', newline='') as csvfile:
+        flgCSV = 0
+        if path.exists("Data/" + self.strYYYYMMDD + ".csv"):
+            flgCSV = 1
+        with open("Data/" + self.strYYYYMMDD + ".csv", 'a', newline='') as csvfile:
             inData = csv.writer(csvfile)
-            inData.writerow(['S. No.', 'hours', 'Minutes', 'TotalMinutes','Activity done on(date)', 'Activity done at(time)','ActivityDoneTimeNumeric','Activity logged on(date)', 'Activity logged at(time)','Category','Sub Category 1','Sub Category 2','Title','Description'])
-            inData.writerow([self.sNum,self.hours, self.minutes, self.totalMinutes,self.actDoneOn,self.actDoneAt,self.actLoggedOn,self.actLoggedAt,self.ActivityDoneTimeNumeric,self.catValue,self.subcat1Value,self.subcat2Value,self.titleText,self.desText])
+            if flgCSV==0:
+                inData.writerow(['S. No.', 'hours', 'Minutes', 'TotalMinutes','Activity done on(date)', 'Activity done at(time)','ActivityDoneTimeNumeric','Activity logged on(date)', 'Activity logged at(time)','Category','Sub Category 1','Sub Category 2','Title','Description'])
+            inData.writerow([self.sNum,self.hours, self.minutes, self.totalMinutes,self.actDoneOn,self.actDoneAt,self.ActivityDoneTimeNumeric,self.actLoggedOn,self.actLoggedAt,self.catValue,self.subcat1Value,self.subcat2Value,self.titleText,self.desText])
 
 
 from tkinter import *
 from datetime import datetime
 from tkinter import ttk
 import csv
+import os.path
+from os import path
+from tkcalendar import Calendar, DateEntry
+import pandas as pd
 
 root = Tk()
 
