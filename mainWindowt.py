@@ -1,18 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Nov 26 23:20:08 2020
-
-@author: piyush
-"""
-
-
-
-
-
-
-
-
 class mainWindow():
     def __init__(self,root,heightMain,widthMain):
         root.geometry(""+str(widthMain)+"x"+str(heightMain))
@@ -29,8 +14,10 @@ class mainWindow():
 
         #####Add categories Menu options
         self.addCatMenu = Menu(self.menu,tearoff=False)
-        self.menu.add_cascade(label="Options",menu=self.addCatMenu)
-        self.addCatMenu.add_command(label="Add/Remove Categories",command=self.fnAddCat)
+        self.menu.add_cascade(label="Add Categories",menu=self.addCatMenu)
+        self.addCatMenu.add_command(label="Main Categories",command=self.fnAddCat)
+        self.addCatMenu.add_command(label="Sub Categories 1",command=self.fnAddSubCat1)
+        self.addCatMenu.add_command(label="Sub Categories 2",command=self.fnAddSubCat2)
 
         #####Help Menu
         self.helpmenu = Menu(self.menu, tearoff=False)
@@ -103,45 +90,28 @@ class mainWindow():
         btnDateChange = Button(root,text="Change",highlightbackground="#e6e6e6",font=("Times",12,"bold"),command=self.changeButAction)
         btnDateChange.place(x=320,y=40,height=20)
 
-
-        #Label of category list
-        self.lblCat = Label(root,text="Categories",font=("Times",14,"bold"))
-        self.lblCat.place(x=400,y=10)
-
         
         #rendering main category drop down list
         self.mainCatList = ttk.Combobox(root,font=("Times",18))
-        self.mainCatList.place(x=400,y=30,width=230)
-
-        self.catListUpdate()
-        self.modelTraining()
-
-
-    def modelTraining(self):
-        df = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Data/20201203.csv")
-        df_new = df[['TotalMinutes','ActivityDoneTimeNumeric','Category']]
-        inputs = df_new.drop('Category',axis='columns')
-        target = df_new[['Category']]
-        from sklearn.preprocessing import LabelEncoder
-        le_category = LabelEncoder()
-        target['Category_n'] = le_category.fit_transform(target['Category'])
-        target = target.drop('Category',axis="columns")
-        from sklearn import tree
-        model = tree.DecisionTreeClassifier()
-        model.fit(inputs,target)
-        print(model.predict([[400,50.67]]))
-
-
-    def catListUpdate(self):
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
-        catList = ['*Please Select Category']
-
-        dfRow,dfCol = dfCatMain.shape
-        for catIter in range(dfRow):
-            catList.append(dfCatMain['mainCatName'][catIter])
-
-        self.mainCatList['values'] = tuple(catList)
+        self.mainCatList.place(x=400,y=10,width=230)
+        self.mainCatList['values'] = ('*Select Main Category','Cat2','Cat3')
         self.mainCatList.current(0)
+
+        #rendering sub category level 1
+        self.sub1CatList = ttk.Combobox(root)
+        self.sub1CatList.place(x=420,y=50)
+        self.sub1CatList['values'] = ('Select Sub Category 1','Cat2','Cat3')
+        self.sub1CatList.current(0)
+
+        #rendering sub category level 2
+        self.sub2CatList = ttk.Combobox(root)
+        self.sub2CatList.place(x=420,y=80)
+        self.sub2CatList['values'] = ('Select Sub Category 2','Cat2','Cat3')
+        self.sub2CatList.current(0)
+
+
+
+
     
     def time(self):
         self.dateTimeNow = datetime.now()
@@ -163,57 +133,54 @@ class mainWindow():
         print("About button has been pressed")
 
     def fnAddCat(self):
-        self.flgRem=0
+        print("fnAddCat has been called")
         self.mainCatWin = Toplevel(root)
-        Label(self.mainCatWin,text="Category name").place(x=10,y=10)
+        Label(self.mainCatWin,text="Add Main Categories").place(x=10,y=10)
         self.inNewCat = Entry(self.mainCatWin)
         self.inNewCat.place(x=10,y=30)
         Button(self.mainCatWin,text="Add",command=self.addNewMainCat).place(x=10,y=60)
-        Button(self.mainCatWin,text="Remove",command=self.fnRemoveMainCat).place(x=60,y=60)
+        Button(self.mainCatWin,text="Remove",command=self.fnRemoveMainCat).place(x=10,y=105)
         if path.exists("catData/mainCat.csv"):
+            self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
             self.fetchMainCat()
 
     def fnRemoveMainCat(self):
-        self.flgRem=0
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
-        dfRow,dfCol = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].shape
-        if(dfRow>0):
-            dropRowInd = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].index
-            print(dfCatMain)
-            dfCatMain = dfCatMain.drop([dfCatMain.index[dropRowInd[0]]])
-            dfCatMain.to_csv('catData/mainCat.csv',mode='w',index=False)
-            self.flgRem=1
-            self.fetchMainCat()
-            self.catListUpdate()
-
-        if(dfRow<1):
-            messagebox.showerror("showerror", "Main Category does not exist")
+        print("remove function has been called")
 
 
     def fetchMainCat(self):
-        self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
         yAxisVal = 110
-        for mainCatIter in range(len(self.mainCatCsv.index.unique())):
+        for mainCatIter in range(len(self.mainCatCsv['mainCatName'].unique())):
             yAxisVal = yAxisVal + 20
-            catIter = Label(self.mainCatWin,text=str(self.mainCatCsv.index[mainCatIter]+1)+". "+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter]))
-            catIter.place(x=10,y=yAxisVal)
-            if self.flgRem==1:
-                nextCatBlnk = Label(self.mainCatWin,text="                                       ")
-                nextCatBlnk.place(x=10,y=yAxisVal+20)
+            abc = IntVar()
+            bcd = 12
+            var = Checkbutton(self.mainCatWin,variable=abc,onvalue=1,offvalue=0,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter]))
+            var.place(x=10,y=yAxisVal)
+            print(type(bcd))
 
     def addNewMainCat(self):
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
-        dfRow,dfCol = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].shape
-        if(dfRow>0):
-            messagebox.showerror("showerror", "Main Category already exist")
+        yAxisVal = 110
+        flgCatMainCSV = 0
+        if path.exists("catData/mainCat.csv"):
+            flgCatMainCSV = 1
+        with open("catData/mainCat.csv","a",newline="") as catCSVAppend:
+            inMainCat = csv.writer(catCSVAppend)
+            if flgCatMainCSV==0:
+                inMainCat.writerow(['mainCatId','mainCatName'])
+            inMainCat.writerow([12,str(self.inNewCat.get())])
+        self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
+        for mainCatIter in range(len(self.mainCatCsv['mainCatName'].unique())):
+            yAxisVal = yAxisVal + 20
+            Checkbutton(self.mainCatWin).place(x=10,y=yAxisVal)
+            Label(self.mainCatWin,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter])).place(x=30,y=yAxisVal)
+    
 
-        if(dfRow<1):
-            newDictRow = {"mainCatName":str(self.inNewCat.get())}
-            dfCatMain = dfCatMain.append(newDictRow,ignore_index=True)
-            dfCatMain.to_csv('catData/mainCat.csv',mode='w',index=False)
-            self.fetchMainCat()
-            self.catListUpdate()
 
+    def fnAddSubCat1(self):
+        print("fnAddSubCat1 has been called")
+
+    def fnAddSubCat2(self):
+        print("fnAddSubCat2 has been called")
 
     def changeButAction(self):
         print("Change button has been pressed")
@@ -266,6 +233,8 @@ class mainWindow():
         self.lblDispTimeSec=int(self.lblDispDateTime[self.lblDispDateTime.rfind(":")+1:])
         self.ActivityDoneTimeNumeric=self.lblDispTimeHrs + (self.lblDispTimeMins/60) + (self.lblDispTimeSec/(60*60))
         self.catValue=self.mainCatList.get()
+        self.subcat1Value=self.sub1CatList.get()
+        self.subcat2Value=self.sub2CatList.get()
         self.titleText=self.inTitle.get()
         self.desText=self.inDesc.get("1.0","end-1c")
         self.csvWrite()
@@ -279,30 +248,5 @@ class mainWindow():
         with open("Data/" + self.strYYYYMMDD + ".csv", 'a', newline='') as csvfile:
             inData = csv.writer(csvfile)
             if flgCSV==0:
-                inData.writerow(['S. No.', 'hours', 'Minutes', 'TotalMinutes','Activity done on(date)', 'Activity done at(time)','ActivityDoneTimeNumeric','Activity logged on(date)', 'Activity logged at(time)','Category','Title','Description'])
-            inData.writerow([self.sNum,self.hours, self.minutes, self.totalMinutes,self.actDoneOn,self.actDoneAt,self.ActivityDoneTimeNumeric,self.actLoggedOn,self.actLoggedAt,self.catValue,self.titleText,self.desText])
-
-
-from tkinter import *
-from datetime import datetime
-from tkinter import ttk
-from tkinter import messagebox
-import csv
-import os.path
-from os import path
-from tkcalendar import Calendar, DateEntry
-import pandas as pd
-
-root = Tk()
-
-
-#Height and Width of main window
-heightMain=600
-widthMain=800
-
-mainWindow(root,heightMain,widthMain)
-
-root.mainloop()
-
-
- 
+                inData.writerow(['S. No.', 'hours', 'Minutes', 'TotalMinutes','Activity done on(date)', 'Activity done at(time)','ActivityDoneTimeNumeric','Activity logged on(date)', 'Activity logged at(time)','Category','Sub Category 1','Sub Category 2','Title','Description'])
+            inData.writerow([self.sNum,self.hours, self.minutes, self.totalMinutes,self.actDoneOn,self.actDoneAt,self.ActivityDoneTimeNumeric,self.actLoggedOn,self.actLoggedAt,self.catValue,self.subcat1Value,self.subcat2Value,self.titleText,self.desText])
