@@ -154,19 +154,24 @@ class mainWindow():
         self.inNewCat = Entry(self.mainCatWin)
         self.inNewCat.place(x=10,y=30)
         Button(self.mainCatWin,text="Add",command=self.addNewMainCat).place(x=10,y=60)
-        Button(self.mainCatWin,text="Remove").place(x=10,y=105)
+        Button(self.mainCatWin,text="Remove",command=self.fnRemoveMainCat).place(x=10,y=105)
         if path.exists("catData/mainCat.csv"):
             self.mainCatCsv = pd.read_csv("catData/mainCat.csv")
             self.fetchMainCat()
 
+    def fnRemoveMainCat(self):
+        print("remove function has been called")
 
 
     def fetchMainCat(self):
         yAxisVal = 110
         for mainCatIter in range(len(self.mainCatCsv['mainCatName'].unique())):
             yAxisVal = yAxisVal + 20
-            Checkbutton(self.mainCatWin,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter])).place(x=10,y=yAxisVal)
-    
+            abc = IntVar()
+            bcd = 12
+            var = Checkbutton(self.mainCatWin,variable=abc,onvalue=1,offvalue=0,text=""+str(self.mainCatCsv['mainCatName'].unique()[mainCatIter]))
+            var.place(x=10,y=yAxisVal)
+            print(type(bcd))
 
     def addNewMainCat(self):
         yAxisVal = 110
