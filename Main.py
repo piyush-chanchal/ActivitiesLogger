@@ -59,6 +59,7 @@ class mainWindow():
         self.inHrsVal = StringVar()
         self.inMnsVal = StringVar()
 
+        self.callbackIter=0
         self.inHrsVal.trace("w", lambda name, index, mode, inHrsVal=self.inHrsVal: self.callback())
         self.inMnsVal.trace("w", lambda name, index, mode, inHrsVal=self.inMnsVal: self.callback())
 
@@ -128,8 +129,9 @@ class mainWindow():
 
 
     def callback(self):
+        self.callbackIter= self.callbackIter + 1
         self.flgModel=0
-        if path.exists("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Models/ModelDT1"):
+        if path.exists("Models/ModelDT1"):
             self.flgModel=1
         if self.flgModel==1:
             self.retrieveAll()
@@ -149,29 +151,57 @@ class mainWindow():
             lstFinalCat = lstFinalCat[0:4]
             print(lstFinalCat)
             dfCatWithCode = pd.read_csv("catData/dfCatWithCode.csv")
-            lstFinalCatLbl=[]
+            self.lstFinalCatLbl=[]
             for top5CatIter in range(4):
                 interimDict = dfCatWithCode[dfCatWithCode.Category_n==lstFinalCat[top5CatIter]]["Category"][0:1].to_dict()
                 for elem in interimDict.values():
-                    lstFinalCatLbl.append(str(elem))
-            print(lstFinalCatLbl)
+                    self.lstFinalCatLbl.append(str(elem))
+            print(self.lstFinalCatLbl)
 
-            firstCat = Label(root,text=lstFinalCatLbl[0],font=("Times",18,"bold"))
-            firstCat.place(x=650,y=75)
-
-            secondCat = Label(root,text=lstFinalCatLbl[1],font=("Times",18,"bold"))
-            secondCat.place(x=650,y=200)
-
-
-            thirdCat = Label(root,text=lstFinalCatLbl[2],font=("Times",18,"bold"))
-            thirdCat.place(x=650,y=350)
+            if self.callbackIter>1:
+                self.firstCat.place_forget()
+            self.firstCat = Button(root,text=self.lstFinalCatLbl[0],font=("Times",18,"bold"),command=self.firstcatAction)
+            self.firstCat.place(x=650,y=75)
 
 
-            fourthCat = Label(root,text=lstFinalCatLbl[3],font=("Times",18,"bold"))
-            fourthCat.place(x=650,y=500)
+            if self.callbackIter>1:
+                self.secondCat.place_forget()
+            self.secondCat = Button(root,text=self.lstFinalCatLbl[1],font=("Times",18,"bold"),command=self.secondcatAction)
+            self.secondCat.place(x=650,y=200)
 
 
-            #print(self.model.predict([[self.totalMinutes,self.ActivityDoneTimeNumeric]]))
+            
+            if self.callbackIter>1:
+                self.thirdCat.place_forget()
+            self.thirdCat = Button(root,text=self.lstFinalCatLbl[2],font=("Times",18,"bold"),command=self.thirdcatAction)
+            self.thirdCat.place(x=650,y=350)
+
+            if self.callbackIter>1:
+                self.fourthCat.place_forget()
+            self.fourthCat = Button(root,text=self.lstFinalCatLbl[3],font=("Times",18,"bold"),command=self.fourthcatAction)
+            self.fourthCat.place(x=650,y=500)
+
+            self.catPos = pd.read_csv("catData/mainCat.csv")
+            self.catPosList = self.catPos['mainCatName'].tolist()
+
+
+    def firstcatAction(self):
+        print("cat Button has been pressed")
+        self.mainCatList.current(self.catPosList.index(self.lstFinalCatLbl[0])+1)
+
+    def secondcatAction(self):
+        print("cat Button has been pressed")
+        self.mainCatList.current(self.catPosList.index(self.lstFinalCatLbl[1])+1)
+    
+    def thirdcatAction(self):
+        print("cat Button has been pressed")
+        self.mainCatList.current(self.catPosList.index(self.lstFinalCatLbl[2])+1)
+
+    def fourthcatAction(self):
+        print("cat Button has been pressed")
+        self.mainCatList.current(self.catPosList.index(self.lstFinalCatLbl[3])+1)
+
+
     def CountFrequency(self,my_list): 
         # Creating an empty dictionary  
         self.freqPValues = {} 
@@ -182,7 +212,7 @@ class mainWindow():
                 self.freqPValues[item] = 1
 
     def modelTraining(self):
-        listData = os.listdir("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Data") # dir is your directory path
+        listData = os.listdir("Data") # dir is your directory path
         listDataFileNums = []
         for dataIter in listData:
             if str(dataIter).find(".csv")>0:
@@ -191,8 +221,8 @@ class mainWindow():
         interimDF = pd.DataFrame()
         for dataIter in range(len(listDataFileNums)-1):
             if dataIter==0:
-                interimDF = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Data/"+str(listDataFileNums[dataIter])+".csv")
-            interimDF = pd.concat([interimDF,pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Data/"+str(listDataFileNums[dataIter+1])+".csv")])
+                interimDF = pd.read_csv("Data/"+str(listDataFileNums[dataIter])+".csv")
+            interimDF = pd.concat([interimDF,pd.read_csv("Data/"+str(listDataFileNums[dataIter+1])+".csv")])
         
         dfFinalRows,dfFinalCol = interimDF.shape
         
@@ -221,7 +251,7 @@ class mainWindow():
 
 
     def catListUpdate(self):
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
+        dfCatMain = pd.read_csv("catData/mainCat.csv",index_col=False)
         catList = ['*Please Select Category']
 
         dfRow,dfCol = dfCatMain.shape
@@ -263,11 +293,10 @@ class mainWindow():
 
     def fnRemoveMainCat(self):
         self.flgRem=0
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
+        dfCatMain = pd.read_csv("catData/mainCat.csv",index_col=False)
         dfRow,dfCol = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].shape
         if(dfRow>0):
             dropRowInd = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].index
-            print(dfCatMain)
             dfCatMain = dfCatMain.drop([dfCatMain.index[dropRowInd[0]]])
             dfCatMain.to_csv('catData/mainCat.csv',mode='w',index=False)
             self.flgRem=1
@@ -290,7 +319,7 @@ class mainWindow():
                 nextCatBlnk.place(x=10,y=yAxisVal+20)
 
     def addNewMainCat(self):
-        dfCatMain = pd.read_csv("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/catData/mainCat.csv",index_col=False)
+        dfCatMain = pd.read_csv("catData/mainCat.csv",index_col=False)
         dfRow,dfCol = dfCatMain[dfCatMain.mainCatName==self.inNewCat.get()].shape
         if(dfRow>0):
             messagebox.showerror("showerror", "Main Category already exist")
@@ -348,15 +377,24 @@ class mainWindow():
     def submitButAction(self):
         self.validation()
         if self.flgError==0:
-            fileList = os.listdir("/Users/piyush/Desktop/ProjectsGitHub/ActivitiesLoggerV1/Data/")
+            fileList = os.listdir("Data/")
             numberFiles = len(fileList)
             if numberFiles>10:
                 messagebox.showinfo("EnoughData","Enough data has been collected. It's time to train a model. Click on 'Machine Learning Options'->'Train Model'")
             self.strYYYYMMDD = str(self.dateTimeNow.strftime("%Y"))+str(self.dateTimeNow.strftime("%m"))+str(self.dateTimeNow.strftime("%d"))
             self.retrieveAll()  ##Retrieving all fields data and saving into variables. Then writing it into csv files
             self.csvWrite()
-            lblSavedSuccess = Label(root,text="Data has been saved on " + str(self.actLoggedOn) + " at " + str(self.actLoggedAt),font=("Times",18))
-            lblSavedSuccess.place(x=50,y=400)
+            last5Entries = pd.read_csv("Data/"+self.strYYYYMMDD+".csv")
+            last5Entries = last5Entries.drop(['TotalMinutes','Activity done on(date)','Activity done at(time)','ActivityDoneTimeNumeric','Activity logged on(date)','Description'],axis=1)
+            last5Entries = last5Entries.tail(8)
+            last5Entries = last5Entries.iloc[::-1]
+            last5Entries.columns = ['Hours','Minutes','LoggedTime','Category','Title']
+            lblLast5Entries = Label(root,text=last5Entries.to_string(index=False),font=("Times",18))
+            lblLast5Entries.place(x=5,y=400)
+            lblDFTitle = Label(root,text="Last 8 entries of today",font=("Times",20,"bold"))
+            lblDFTitle.place(x=5,y=370)
+            lblSavedSuccess = Label(root,text="Data has been saved")
+            lblSavedSuccess.place(x=400,y=150)
 
     def retrieveAll(self):
         self.hours=str(self.inHrs.get())
