@@ -4,3 +4,7 @@ hours,Minutes,TotalMinutes,Activity done on(date),Activity done at(time),Activit
 12,1,721,12/09/20,05:12:28,5.207777777777778,12/09/20,05:12:28,Project B meeting,,
 12,1,721,12/09/20,05:12:30,5.208333333333334,12/09/20,05:12:30,Project A meeting,,
 1,1,61,12/09/20,05:12:37,5.210277777777778,12/09/20,05:12:37,Project A meeting,,
+07,30,450,12/09/20,05:47:03,5.784166666666667,12/09/20,05:47:03,Client Meeting,Client meeting attended,
+07,45,465,12/09/20,05:47:17,5.788055555555555,12/09/20,05:47:17,Project C,Client meeting attended,
+08,30,510,12/09/20,05:47:34,5.792777777777777,12/09/20,05:47:34,Project B,Client meeting attended,
+12,01,721,12/09/20,05:47:56,5.7988888888888885,12/09/20,05:47:56,Project B meeting,Client meeting attended,
