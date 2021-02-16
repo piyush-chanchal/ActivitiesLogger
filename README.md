@@ -21,4 +21,4 @@ There is a Demo video which can be watched for a quick demonstration. File name 
 3. TKinter library
 4. Decison Tree model 
 5. Random forest algorithm
-6. Pandas library
+6. Pandas Library
