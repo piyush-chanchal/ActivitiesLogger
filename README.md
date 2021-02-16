@@ -15,9 +15,10 @@ Basically this application predicts the category which user is going to select w
 
 There is a Demo video which can be watched for a quick demonstration. File name is ActivitiesLogger.mp4 and it is available in Master Branch. 
 
-## Programming languages and Tools
+## Programming languages and Library
 1. Python
 2. SciKit Learn library
 3. TKinter library
 4. Decison Tree model 
 5. Random forest algorithm
+6. Pandas library
